@@ -1,31 +1,23 @@
-function TodoForm({ newTodo, setNewTodo, todos, setTodos }) {
+import { useRef } from 'react';
+function TodoForm({ onAddTodo }) {
+  const todoTitleInput = useRef('');
   /*funcion que actualiza estado cuando alguien escribe */
-  const handleChange = (e) => {
-    setNewTodo(e.target.value);
-  };
 
-  // funcion que agrega un nuevo todo
-  const handleSubmit = (e) => {
-    e.preventDefault(); // evita recargar la pagina
-    if (newTodo.trim() === '') return; // Prreviene todos vacios
+  function handleAddTodo(event) {
+    event.preventDefault();
+    const title = event.target.title.value.trim();
+    if (title === '') return;
 
-    const newTodoItem = {
-      id: todos.length + 1, // Genera un ID único
-      title: newTodo.trim(), // Elimina espacios en blanco al inicio y al final
-    };
-    setTodos([...todos, newTodoItem]); //agraga el nuevo todo al estado
-    setNewTodo(''); // Limpia el campo de entrada
-  };
+    onAddTodo(title);
+    /*limpiamos el input y volvemos a enfocar*/
+    event.target.title.value = '';
+    todoTitleInput.current.focus();
+  }
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleAddTodo}>
       <label htmlFor="todoTitle">Todo</label>
-      <input
-        type="text"
-        value={newTodo}
-        onChange={handleChange}
-        id="todoTitle"
-      />
+      <input name="title" type="text" id="todoTitle" ref={todoTitleInput} />
       <button type="submit">Add todo</button>
     </form>
   );
