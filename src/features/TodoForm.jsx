@@ -1,24 +1,25 @@
-import { useRef } from "react";
-import { useState } from "react";
-import TextInputWithLabel from "../shared/TextInputWithLabel";
+import { useRef } from 'react';
+import { useState } from 'react';
+import TextInputWithLabel from '../shared/TextInputWithLabel';
 
-function TodoForm({ onAddTodo }) {
-  const [workingTodoTitle, setWorkingTodoTitle] = useState("");
+function TodoForm({ onAddTodo, isSaving, setIsSaving }) {
+  const [workingTodoTitle, setWorkingTodoTitle] = useState('');
 
   function handleAddTodo(event) {
     event.preventDefault();
 
-    // Accede al valor del input a través de la referencia
-    // const title = todoTitleInput.current.value.trim();
-
-    if (workingTodoTitle.trim() === "") {
+    if (workingTodoTitle.trim() === '') {
       return;
     }
 
-    onAddTodo(workingTodoTitle);
+    // Envía un objeto con title e isCompleted
+    onAddTodo({
+      title: workingTodoTitle.trim(),
+      isCompleted: false,
+    });
 
-    // Limpia el input y vuelve a enfocarlo usando la referencia
-    setWorkingTodoTitle("");
+    // Limpia el input
+    setWorkingTodoTitle('');
   }
 
   return (
@@ -30,8 +31,8 @@ function TodoForm({ onAddTodo }) {
         labelText="Todo"
       />
 
-      <button type="submit" disabled={workingTodoTitle.trim() === ""}>
-        Add todo
+      <button disabled={workingTodoTitle.trim() === ''}>
+        {isSaving ? 'Saving...' : 'Add Todo'}
       </button>
     </form>
   );
