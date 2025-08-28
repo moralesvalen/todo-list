@@ -1,9 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import TextInputWithLabel from '../../shared/TextInputWithLabel';
 
 function TodoListItem({ todo, onCompleteTodo, onUpdateTodo }) {
   const [isEditing, setIsEditing] = useState(false);
   const [workingTitle, setWorkingTitle] = useState(todo.title);
+
+  // Sincroniza workingTitle con el prop todo
+  useEffect(() => {
+    setWorkingTitle(todo.title);
+  }, [todo]);
 
   const handleCancel = () => {
     setWorkingTitle(todo.title);
@@ -21,6 +26,7 @@ function TodoListItem({ todo, onCompleteTodo, onUpdateTodo }) {
     onUpdateTodo({ ...todo, title: workingTitle });
     setIsEditing(false);
   };
+
   return (
     <li>
       <form onSubmit={handleUpdate}>
@@ -51,4 +57,5 @@ function TodoListItem({ todo, onCompleteTodo, onUpdateTodo }) {
     </li>
   );
 }
+
 export default TodoListItem;
