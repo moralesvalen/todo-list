@@ -2,18 +2,41 @@ import './App.css';
 import TodoList from './features/TodoList/TodoList';
 import TodoForm from './features/TodoForm';
 import { useEffect, useState } from 'react';
+import TodosViewForm from './features/TodosViewForm';
+
+function encodeUrl({ sortField, sortDirection, queryString }) {
+  let searchQuery = '';
+  let sortQuery = `sort[0][field]=${sortField}&sort[0][direction]=${sortDirection}`;
+  const baseUrl = `https://api.airtable.com/v0/${
+    import.meta.env.VITE_BASE_ID
+  }/${import.meta.env.VITE_TABLE_NAME}`;
+
+  if (queryString) {
+    searchQuery = `&filterByFormula=SEARCH("${queryString}", {title})`;
+  }
+  return encodeURI(`${baseUrl}?${sortQuery}${searchQuery}`);
+}
+
 function App() {
   const [todoList, setTodoList] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const [sortField, setSortField] = useState('createdTime');
+  const [sortDirection, setSortDirection] = useState('desc');
+  const [queryString, setQueryString] = useState('');
+  /*
+  const url = `https://api.airtable.com/v0/${import.meta.env.VITE_BASE_ID}/${
+    import.meta.env.VITE_TABLE_NAME
+  }`;*/
 
-  const url = `https://api.airtable.com/v0/${import.meta.env.VITE_BASE_ID}/${import.meta.env.VITE_TABLE_NAME}`;
+  const url = encodeUrl({ sortField, sortDirection, queryString });
   const token = `Bearer ${import.meta.env.VITE_PAT}`;
 
   console.log('Fetching from URL:', url); // verifica que no haya undefined
 
   useEffect(() => {
+    const url = encodeUrl({ sortField, sortDirection, queryString });
     const fetchTodos = async () => {
       setIsLoading(true);
       try {
@@ -47,7 +70,7 @@ function App() {
       }
     };
     fetchTodos();
-  }, []);
+  }, [sortDirection, sortField, queryString]);
 
   const addTodo = async (newTodo) => {
     const payload = {
@@ -226,6 +249,15 @@ function App() {
         todoList={todoList}
         onCompleteTodo={completeTodo}
         onUpdateTodo={updateTodo}
+      />
+      <hr />
+      <TodosViewForm
+        sortField={sortField}
+        sortDirection={sortDirection}
+        setSortField={setSortField}
+        setSortDirection={setSortDirection}
+        queryString={queryString}
+        setQueryString={setQueryString}
       />
       {errorMessage && (
         <div>
