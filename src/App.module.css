@@ -1,0 +1,13 @@
+.appContainer {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 0.5rem;
+}
+
+.errorMessage {
+  border: 1px solid red;
+  color: red;
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+}
