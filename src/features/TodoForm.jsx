@@ -14,25 +14,27 @@ const StyledButton = styled.button`
     font-style: italic;
   }
 `;
-function TodoForm({ onAddTodo, isSaving, setIsSaving }) {
+function TodoForm({ onAddTodo, isSaving }) {
   const [workingTodoTitle, setWorkingTodoTitle] = useState('');
 
   function handleAddTodo(event) {
     event.preventDefault();
 
-    if (workingTodoTitle.trim() === '') {
-      return;
-    }
+    if (isSaving) return;
+
+    const title = workingTodoTitle.trim();
+    if (title === '') return;
 
     // Envía un objeto con title e isCompleted
     onAddTodo({
-      title: workingTodoTitle.trim(),
+      title,
       isCompleted: false,
     });
 
-    // Limpia el input
     setWorkingTodoTitle('');
   }
+
+  const isDisabled = isSaving || workingTodoTitle.trim() === '';
 
   return (
     <StyledForm onSubmit={handleAddTodo}>
