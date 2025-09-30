@@ -1,28 +1,36 @@
 import './App.css';
-import TodoList from './features/TodoList/TodoList';
-import TodoForm from './features/TodoForm';
-import { useEffect, useState, useReducer } from 'react';
-import TodosViewForm from './features/TodosViewForm';
+import { useEffect, useState, useReducer, use } from 'react';
 import { useCallback } from 'react';
 import './App.css';
 import styles from './App.module.css';
-import HeaderTitle from './shared/HeaderTitle';
+import Header from './shared/Header';
 import {
   reducer as todosReducer,
   actions as todosActions,
   initialState as todosInitialState,
 } from './reducers/todos.reducer';
+import TodosPage from './pages/TodosPage';
+import { useLocation } from 'react-router';
+import { Routes, Route } from 'react-router-dom';
+import About from './pages/About';
+import NotFound from './pages/NotFound';
 
 function App() {
-  /* antes de reducer
-  const [todoList, setTodoList] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
-  const [isSaving, setIsSaving] = useState(false);
-*/
   const [sortField, setSortField] = useState('createdTime');
   const [sortDirection, setSortDirection] = useState('desc');
   const [queryString, setQueryString] = useState('');
+  const [pageTitle, setPageTitle] = useState('My Todos');
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.pathname === '/') {
+      setPageTitle('Todo List');
+    } else if (location.pathname === '/about') {
+      setPageTitle('About');
+    } else {
+      setPageTitle('Not Found');
+    }
+  }, [location.pathname]);
 
   //uso de reducer
   const [todoState, dispatch] = useReducer(todosReducer, todosInitialState);
@@ -47,7 +55,6 @@ function App() {
   useEffect(() => {
     const url = encodeUrl();
     const fetchTodos = async () => {
-      // antes:      setIsLoading(true);
       dispatch({ type: todosActions.fetchTodos });
       try {
         const options = {
@@ -63,20 +70,9 @@ function App() {
         }
 
         const data = await resp.json();
-        /*
-        const todos = data.records.map((record) => {
-          const todo = {
-            id: record.id,
-            title: record.fields.title || '',
-            isCompleted: record.fields.isCompleted || false,
-          };
-          return todo;
-        });*/
 
-        //antes: setTodoList(todos);
         dispatch({ type: todosActions.loadTodos, records: data.records });
       } catch (error) {
-        //antes:  setErrorMessage(error.message);
         dispatch({ type: todosActions.setLoadError, error });
       } finally {
         //setIsLoading(false);
@@ -106,33 +102,17 @@ function App() {
       body: JSON.stringify(payload),
     };
 
-    //antes:  setIsSaving(true);
-
     dispatch({ type: todosActions.startRequest });
     try {
       const resp = await fetch(url, options);
       if (!resp.ok) throw new Error(resp.statusText);
 
       const { records } = await resp.json();
-      /*
-      const savedTodo = {
-        id: records[0].id,
-        ...records[0].fields,
-      };
-     
 
-      if (!records[0].fields.isCompleted) {
-        savedTodo.isCompleted = false;
-      }*/
       dispatch({ type: todosActions.addTodo, records });
-      // antes:  setTodoList([...todoList, savedTodo]);
-      // dispatch({ type: todosActions.addTodo, record: savedTodo });
     } catch (error) {
-      // antes: setErrorMessage(error.message);
       dispatch({ type: todosActions.setLoadError, error });
     } finally {
-      // antes: setIsSaving(false);
-
       dispatch({ type: todosActions.endRequest });
     }
   };
@@ -165,15 +145,6 @@ function App() {
     try {
       const resp = await fetch(url, options);
       if (!resp.ok) throw new Error(resp.statusText);
-      /*
-      const { records } = await resp.json();
-      const savedTodo = {
-        id: records[0].id,
-        title: records[0].fields?.title ?? '',
-        isCompleted: records[0].fields?.isCompleted ?? false,
-      };
-
-      dispatch({ type: todosActions.updateTodo, editedTodo: savedTodo });*/
     } catch (error) {
       dispatch({
         type: todosActions.revertTodo,
@@ -212,20 +183,9 @@ function App() {
       body: JSON.stringify(payload),
     };
 
-    //antes: setIsSaving(true);
-    //    dispatch({ type: todosActions.startRequest });
     try {
       const resp = await fetch(url, options);
       if (!resp.ok) throw new Error(resp.statusText);
-      /*
-      const { records } = await resp.json();
-      const savedTodo = {
-        id: records[0].id,
-        ...records[0].fields,
-        isCompleted: records[0].fields.isCompleted ?? false,
-      };
-
-      dispatch({ type: todosActions.updateTodo, editedTodo: savedTodo });*/
     } catch (error) {
       if (originalTodo) {
         dispatch({
@@ -240,39 +200,35 @@ function App() {
       dispatch({ type: todosActions.endRequest });
     }
   };
-  ///fin updateTodo
+  ///fin updateTodo <div className={styles.appContainer}>
   return (
     <>
-      <HeaderTitle className="header" />
+      <Header className="header">{pageTitle}</Header>
 
       <div className={styles.appContainer}>
-        <TodoForm onAddTodo={addTodo} isSaving={todoState.isSaving} />
-        <hr />
-
-        <TodoList
-          isLoading={todoState.isLoading}
-          todoList={todoState.todoList}
-          onCompleteTodo={completeTodo}
-          onUpdateTodo={updateTodo}
-        />
-        <hr />
-        <TodosViewForm
-          sortField={sortField}
-          sortDirection={sortDirection}
-          setSortField={setSortField}
-          setSortDirection={setSortDirection}
-          queryString={queryString}
-          setQueryString={setQueryString}
-        />
-        {todoState.errorMessage && (
-          <div>
-            <hr />
-            <p>{todoState.errorMessage}</p>
-            <button onClick={() => dispatch({ type: todosActions.clearError })}>
-              Dismiss
-            </button>
-          </div>
-        )}
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <TodosPage
+                todoState={todoState}
+                addTodo={addTodo}
+                completeTodo={completeTodo}
+                updateTodo={updateTodo}
+                sortField={sortField}
+                sortDirection={sortDirection}
+                setSortField={setSortField}
+                setSortDirection={setSortDirection}
+                queryString={queryString}
+                setQueryString={setQueryString}
+                dispatch={dispatch}
+                todosActions={todosActions}
+              />
+            }
+          />
+          <Route path="/about" element={<About />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
       </div>
     </>
   );
