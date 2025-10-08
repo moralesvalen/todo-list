@@ -7,6 +7,7 @@ const StyledForm = styled.form`
   display: flex;
   flex-direction: column;
   padding: 0.1rem;
+  gap: 0.5rem;
 `;
 
 const StyledButton = styled.button`
@@ -14,6 +15,7 @@ const StyledButton = styled.button`
     font-style: italic;
   }
 `;
+
 function TodoForm({ onAddTodo, isSaving }) {
   const [workingTodoTitle, setWorkingTodoTitle] = useState('');
 
@@ -42,7 +44,7 @@ function TodoForm({ onAddTodo, isSaving }) {
         value={workingTodoTitle}
         onChange={(event) => setWorkingTodoTitle(event.target.value)}
         elementId="todoTitle"
-        labelText="Todo: "
+        labelText="Todo:"
       />
 
       <StyledButton disabled={workingTodoTitle.trim() === ''}>
